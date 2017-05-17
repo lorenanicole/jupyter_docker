@@ -8,9 +8,12 @@ RUN mkdir /home/jupyter/
 
 ADD entrypoint.sh /home/jupyter/
 RUN chmod +x /home/jupyter/entrypoint.sh
-ADD notebook/ /home/jupyter
+ADD requirements.txt /home/jupyter/
+ADD notebooks/ /home/jupyter/notebooks
 
 RUN chown jupyter:jupyter /home/jupyter/
+
+VOLUME ["/home/jupyter/notebooks"]
 
 WORKDIR /home/jupyter
 
