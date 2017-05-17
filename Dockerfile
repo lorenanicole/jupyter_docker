@@ -1,28 +1,24 @@
-FROM python:2
-ENV PYTHONUNBUFFERRED 1
-RUN pip install jupyter
+FROM python:3
 
-RUN useradd --create-home --home-dir /home/docker --shell /bin/bash docker
-RUN adduser docker sudo
+RUN pip install virtualenv
 
-ADD start.sh /home/docker/start.sh
-RUN chmod +x /home/docker/start.sh
-RUN chown docker /home/docker/start.sh
+RUN useradd jupyter
+RUN adduser jupyter sudo
+RUN mkdir /home/jupyter/
 
-ADD prod_sentiment.ipynb /home/docker/prod_sentiment.ipynb
-ADD output.txt /home/docker/output.txt
-RUN chmod +x /home/docker/output.txt
-RUN chown docker /home/docker/output.txt
+ADD entrypoint.sh /home/jupyter/
+RUN chmod +x /home/jupyter/entrypoint.sh
+ADD notebook/ /home/jupyter
 
-EXPOSE 8888
-RUN usermod -a -G sudo docker
-RUN echo "docker ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-USER docker
+RUN chown jupyter:jupyter /home/jupyter/
 
-ENV HOME=/home/docker
+WORKDIR /home/jupyter
+
+RUN virtualenv myenv && pip install -r /home/jupyter/requirements.txt
+
 ENV SHELL=/bin/bash
-ENV USER=docker
+ENV USER=jupyter
 
-RUN printenv
-CMD ./home/docker/start.sh
+EXPOSE 8888:8888
 
+ENTRYPOINT ["/bin/bash", "/home/jupyter/entrypoint.sh"]
